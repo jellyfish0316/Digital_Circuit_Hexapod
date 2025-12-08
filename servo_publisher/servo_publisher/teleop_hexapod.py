@@ -17,23 +17,23 @@ NUM_SERVOS = 12
 # Odd IDs: Horizontal (Coxa), Even IDs: Vertical (Femur)
 
 # Neutral positions
-NEUTRAL_COXA = 90.0
-NEUTRAL_FEMUR = 90.0
+NEUTRAL_COXA = 120.0
+NEUTRAL_FEMUR = 30.0
 
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
 SWING_ANGLE = 20.0  # Degrees to swing leg forward/backward
-STEP_DELAY = 0.2    # Seconds between gait steps (slower for safety)
+TIMER_PERIOD = 0.05 # Seconds (20Hz) for input polling
+GAIT_INTERVAL = 0.5   # Seconds between gait steps (Walking speed)
 
-# Servo mapping (0-based indices)
-# Map Leg Index (0-5) to (Coxa_Servo_Index, Femur_Servo_Index)
+# Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
 LEG_SERVO_MAP = [
-    (3, 10),  # Leg 0
-    (2, 8),   # Leg 1
-    (7, 1),   # Leg 2
-    (4, 9),   # Leg 3
-    (5, 11),  # Leg 4
-    (0, 6)    # Leg 5
+    (4, 11), # Leg 0: Coxa Index 10, Femur Index 11 (Servo 11, 12)
+    (3, 9),   # Leg 1: Coxa Index 8, Femur Index 9
+    (8, 2),
+    (5, 10),
+    (6, 12),
+    (1, 7)
 ]
 
 class HexapodTeleop(Node):
@@ -45,20 +45,35 @@ class HexapodTeleop(Node):
         self.get_logger().info('Use WASD to move, Space to stop, Q to quit')
         
         # State
-        self.positions = [90.0] * NUM_SERVOS
+        self.positions = []       # 先清空
+        self.reset_to_neutral()   # 直接呼叫上面改好的函式來初始化
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
+        self.last_step_time = 0
         
         # Timer for gait loop
-        self.timer = self.create_timer(STEP_DELAY, self.gait_loop)
+        self.timer = self.create_timer(TIMER_PERIOD, self.gait_loop)
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
-        rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+        
+        # 1. 將 timeout 改為 0 (不等待，立即檢查)
+        rlist, _, _ = select.select([sys.stdin], [], [], 0.0)
+        
+        key = ''
         if rlist:
-            key = sys.stdin.read(1)
-        else:
-            key = ''
+            # 2. 如果有資料，使用迴圈把緩衝區"清空"，只取最後一個字元
+            # 這能解決"按住不放後，放開卻停不下來"的問題
+            while True:
+                input_char = sys.stdin.read(1)
+                if input_char:
+                    key = input_char
+                
+                # 再次檢查是否還有剩餘的字元在排隊
+                rlist_check, _, _ = select.select([sys.stdin], [], [], 0.0)
+                if not rlist_check:
+                    break # 緩衝區空了，跳出
+                    
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
         return key
 
@@ -81,12 +96,23 @@ class HexapodTeleop(Node):
         if self.current_cmd == 'stop':
             self.reset_to_neutral()
         else:
-            self.step_gait()
+            now = time.time()
+            if now - self.last_step_time > GAIT_INTERVAL:
+                self.step_gait()
+                self.last_step_time = now
             
         self.publish_joints()
 
     def reset_to_neutral(self):
-        self.positions = [90.0] * NUM_SERVOS
+        self.positions = []
+        for i in range(NUM_SERVOS):
+            # ID 1, 3, 5... (List Index 0, 2, 4...) 是 Coxa (水平)
+            # ID 2, 4, 6... (List Index 1, 3, 5...) 是 Femur (垂直)
+            if i % 2 == 0:
+                self.positions.append(NEUTRAL_COXA)   # 120.0
+            else:
+                self.positions.append(NEUTRAL_FEMUR)  # 30.0 (站立)
+        
         self.gait_phase = 0
 
     def step_gait(self):
@@ -97,10 +123,10 @@ class HexapodTeleop(Node):
         # Leg Indices (0-based for list):
         # Leg 1 (RF): 0, 1 (ID 1,2)
         # Leg 2 (RM): 2, 3 (ID 3,4)
-        # Leg 3 (RB): 4, 5 (ID 5,6)
+        # Leg 3 (RR): 4, 5 (ID 5,6)
         # Leg 4 (LF): 6, 7 (ID 7,8)
         # Leg 5 (LM): 8, 9 (ID 9,10)
-        # Leg 6 (LB): 10, 11 (ID 11,12)
+        # Leg 6 (LR): 10, 11 (ID 11,12)
         
         # Tripod Groups (Indices of legs 0-5)
         # Group A: 0 (RF), 2 (RM), 4 (RR) -> Wait, Tripod is 1,3,5 vs 2,4,6?
@@ -140,7 +166,9 @@ class HexapodTeleop(Node):
             
         # Helper to set leg
         def set_leg(leg_idx, lift, swing_val):
-            coxa_idx, femur_idx = LEG_SERVO_MAP[leg_idx]
+            coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+            coxa_idx = coxa_id - 1
+            femur_idx = femur_id - 1
             
             # Femur: Lift means smaller angle (up)
             femur_angle = NEUTRAL_FEMUR - LIFT_HEIGHT if lift else NEUTRAL_FEMUR
@@ -183,8 +211,8 @@ class HexapodTeleop(Node):
                     else:
                         coxa_angle += swing_val # Left forward
 
-            self.positions[coxa_idx] = coxa_angle
-            self.positions[femur_idx] = femur_angle
+            self.positions[coxa_idx] = max(0.0, min(240.0, coxa_angle))
+            self.positions[femur_idx] = max(0.0, min(240.0, femur_angle))
 
         # Execute Phase
         if phase == 0:

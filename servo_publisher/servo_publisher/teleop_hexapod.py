@@ -23,8 +23,7 @@ NEUTRAL_FEMUR = 120.0
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
 SWING_ANGLE = 20.0  # Degrees to swing leg forward/backward
-TIMER_PERIOD = 0.05 # Seconds (20Hz) for input polling
-GAIT_INTERVAL = 0.5   # Seconds between gait steps (Walking speed)
+STEP_DELAY = 0.2    # Seconds between gait steps (slower for safety)
 
 # Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
 LEG_SERVO_MAP = [
@@ -48,10 +47,9 @@ class HexapodTeleop(Node):
         self.positions = [120.0] * NUM_SERVOS
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
-        self.last_step_time = 0
         
         # Timer for gait loop
-        self.timer = self.create_timer(TIMER_PERIOD, self.gait_loop)
+        self.timer = self.create_timer(STEP_DELAY, self.gait_loop)
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
@@ -82,10 +80,7 @@ class HexapodTeleop(Node):
         if self.current_cmd == 'stop':
             self.reset_to_neutral()
         else:
-            now = time.time()
-            if now - self.last_step_time > GAIT_INTERVAL:
-                self.step_gait()
-                self.last_step_time = now
+            self.step_gait()
             
         self.publish_joints()
 

@@ -17,8 +17,8 @@ NUM_SERVOS = 12
 # Odd IDs: Horizontal (Coxa), Even IDs: Vertical (Femur)
 
 # Neutral positions
-NEUTRAL_COXA = 90.0
-NEUTRAL_FEMUR = 90.0
+NEUTRAL_COXA = 120.0
+NEUTRAL_FEMUR = 0.0
 
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
@@ -44,7 +44,8 @@ class HexapodTeleop(Node):
         self.get_logger().info('Use WASD to move, Space to stop, Q to quit')
         
         # State
-        self.positions = [90.0] * NUM_SERVOS
+        # State
+        self.reset_to_neutral()
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
         
@@ -85,7 +86,11 @@ class HexapodTeleop(Node):
         self.publish_joints()
 
     def reset_to_neutral(self):
-        self.positions = [90.0] * NUM_SERVOS
+        self.positions = [0.0] * NUM_SERVOS
+        for leg_idx in range(6):
+            coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+            self.positions[coxa_id - 1] = NEUTRAL_COXA
+            self.positions[femur_id - 1] = NEUTRAL_FEMUR
         self.gait_phase = 0
 
     def step_gait(self):
@@ -143,8 +148,8 @@ class HexapodTeleop(Node):
             coxa_idx = coxa_id - 1
             femur_idx = femur_id - 1
             
-            # Femur: Lift means smaller angle (up)
-            femur_angle = NEUTRAL_FEMUR - LIFT_HEIGHT if lift else NEUTRAL_FEMUR
+            # Femur: Lift means larger angle (up from 0)
+            femur_angle = NEUTRAL_FEMUR + LIFT_HEIGHT if lift else NEUTRAL_FEMUR
             
             # Coxa:
             # Right side (Legs 0,1,2): Forward is -angle (e.g. 90->60) or +angle?
@@ -184,8 +189,8 @@ class HexapodTeleop(Node):
                     else:
                         coxa_angle += swing_val # Left forward
 
-            self.positions[coxa_idx] = coxa_angle
-            self.positions[femur_idx] = femur_angle
+            self.positions[coxa_idx] = max(0.0, min(240.0, coxa_angle))
+            self.positions[femur_idx] = max(0.0, min(240.0, femur_angle))
 
         # Execute Phase
         if phase == 0:

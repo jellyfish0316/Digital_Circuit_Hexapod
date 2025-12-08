@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'servo_trajectory_pub = servo_publisher.angle_pub:main',
+            'angle_pub = servo_publisher.angle_pub:main',
+            'teleop_hexapod = servo_publisher.teleop_hexapod:main',
         ],
     },
 )

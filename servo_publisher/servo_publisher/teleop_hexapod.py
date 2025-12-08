@@ -18,12 +18,13 @@ NUM_SERVOS = 12
 
 # Neutral positions
 NEUTRAL_COXA = 120.0
-NEUTRAL_FEMUR = 0.0
+NEUTRAL_FEMUR = 120.0
 
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
 SWING_ANGLE = 20.0  # Degrees to swing leg forward/backward
-STEP_DELAY = 0.2    # Seconds between gait steps (slower for safety)
+TIMER_PERIOD = 0.05 # Seconds (20Hz) for input polling
+GAIT_INTERVAL = 0.5   # Seconds between gait steps (Walking speed)
 
 # Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
 LEG_SERVO_MAP = [
@@ -44,13 +45,13 @@ class HexapodTeleop(Node):
         self.get_logger().info('Use WASD to move, Space to stop, Q to quit')
         
         # State
-        # State
-        self.reset_to_neutral()
+        self.positions = [120.0] * NUM_SERVOS
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
+        self.last_step_time = 0
         
         # Timer for gait loop
-        self.timer = self.create_timer(STEP_DELAY, self.gait_loop)
+        self.timer = self.create_timer(TIMER_PERIOD, self.gait_loop)
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
@@ -81,16 +82,15 @@ class HexapodTeleop(Node):
         if self.current_cmd == 'stop':
             self.reset_to_neutral()
         else:
-            self.step_gait()
+            now = time.time()
+            if now - self.last_step_time > GAIT_INTERVAL:
+                self.step_gait()
+                self.last_step_time = now
             
         self.publish_joints()
 
     def reset_to_neutral(self):
-        self.positions = [0.0] * NUM_SERVOS
-        for leg_idx in range(6):
-            coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
-            self.positions[coxa_id - 1] = NEUTRAL_COXA
-            self.positions[femur_id - 1] = NEUTRAL_FEMUR
+        self.positions = [120.0] * NUM_SERVOS
         self.gait_phase = 0
 
     def step_gait(self):
@@ -148,8 +148,8 @@ class HexapodTeleop(Node):
             coxa_idx = coxa_id - 1
             femur_idx = femur_id - 1
             
-            # Femur: Lift means larger angle (up from 0)
-            femur_angle = NEUTRAL_FEMUR + LIFT_HEIGHT if lift else NEUTRAL_FEMUR
+            # Femur: Lift means smaller angle (up)
+            femur_angle = NEUTRAL_FEMUR - LIFT_HEIGHT if lift else NEUTRAL_FEMUR
             
             # Coxa:
             # Right side (Legs 0,1,2): Forward is -angle (e.g. 90->60) or +angle?

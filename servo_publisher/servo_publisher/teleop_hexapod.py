@@ -17,22 +17,23 @@ NUM_SERVOS = 12
 # Odd IDs: Horizontal (Coxa), Even IDs: Vertical (Femur)
 
 # Neutral positions
-NEUTRAL_COXA = 120.0
-NEUTRAL_FEMUR = 120.0
+NEUTRAL_COXA = 90.0
+NEUTRAL_FEMUR = 90.0
 
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
 SWING_ANGLE = 20.0  # Degrees to swing leg forward/backward
 STEP_DELAY = 0.2    # Seconds between gait steps (slower for safety)
 
-# Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
+# Servo mapping (0-based indices)
+# Map Leg Index (0-5) to (Coxa_Servo_Index, Femur_Servo_Index)
 LEG_SERVO_MAP = [
-    (4, 11), # Leg 0: Coxa Index 10, Femur Index 11 (Servo 11, 12)
-    (3, 9),   # Leg 1: Coxa Index 8, Femur Index 9
-    (8, 2),
-    (5, 10),
-    (6, 12),
-    (1, 7)
+    (3, 10),  # Leg 0
+    (2, 8),   # Leg 1
+    (7, 1),   # Leg 2
+    (4, 9),   # Leg 3
+    (5, 11),  # Leg 4
+    (0, 6)    # Leg 5
 ]
 
 class HexapodTeleop(Node):
@@ -44,7 +45,7 @@ class HexapodTeleop(Node):
         self.get_logger().info('Use WASD to move, Space to stop, Q to quit')
         
         # State
-        self.positions = [120.0] * NUM_SERVOS
+        self.positions = [90.0] * NUM_SERVOS
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
         
@@ -85,7 +86,7 @@ class HexapodTeleop(Node):
         self.publish_joints()
 
     def reset_to_neutral(self):
-        self.positions = [120.0] * NUM_SERVOS
+        self.positions = [90.0] * NUM_SERVOS
         self.gait_phase = 0
 
     def step_gait(self):
@@ -96,10 +97,10 @@ class HexapodTeleop(Node):
         # Leg Indices (0-based for list):
         # Leg 1 (RF): 0, 1 (ID 1,2)
         # Leg 2 (RM): 2, 3 (ID 3,4)
-        # Leg 3 (RR): 4, 5 (ID 5,6)
+        # Leg 3 (RB): 4, 5 (ID 5,6)
         # Leg 4 (LF): 6, 7 (ID 7,8)
         # Leg 5 (LM): 8, 9 (ID 9,10)
-        # Leg 6 (LR): 10, 11 (ID 11,12)
+        # Leg 6 (LB): 10, 11 (ID 11,12)
         
         # Tripod Groups (Indices of legs 0-5)
         # Group A: 0 (RF), 2 (RM), 4 (RR) -> Wait, Tripod is 1,3,5 vs 2,4,6?
@@ -139,9 +140,7 @@ class HexapodTeleop(Node):
             
         # Helper to set leg
         def set_leg(leg_idx, lift, swing_val):
-            coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
-            coxa_idx = coxa_id - 1
-            femur_idx = femur_id - 1
+            coxa_idx, femur_idx = LEG_SERVO_MAP[leg_idx]
             
             # Femur: Lift means smaller angle (up)
             femur_angle = NEUTRAL_FEMUR - LIFT_HEIGHT if lift else NEUTRAL_FEMUR
@@ -184,8 +183,8 @@ class HexapodTeleop(Node):
                     else:
                         coxa_angle += swing_val # Left forward
 
-            self.positions[coxa_idx] = max(0.0, min(240.0, coxa_angle))
-            self.positions[femur_idx] = max(0.0, min(240.0, femur_angle))
+            self.positions[coxa_idx] = coxa_angle
+            self.positions[femur_idx] = femur_angle
 
         # Execute Phase
         if phase == 0:

@@ -22,9 +22,8 @@ NEUTRAL_FEMUR = 30.0
 
 # Gait parameters
 LIFT_HEIGHT = 30.0  # Degrees to lift leg
-SWING_ANGLE = 20.0  # Degrees to swing leg forward/backward
-TIMER_PERIOD = 0.05 # Seconds (20Hz) for input polling
-GAIT_INTERVAL = 0.5   # Seconds between gait steps (Walking speed)
+SWING_ANGLE = 10.0  # Degrees to swing leg forward/backward
+STEP_DELAY = 0.5    # Seconds between gait steps (slower for safety)
 
 # Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
 LEG_SERVO_MAP = [
@@ -45,36 +44,22 @@ class HexapodTeleop(Node):
         self.get_logger().info('Use WASD to move, Space to stop, Q to quit')
         
         # State
-        self.positions = []       # 先清空
-        self.reset_to_neutral()   # 直接呼叫上面改好的函式來初始化
+        # State
+        self.reset_to_neutral()
         self.gait_phase = 0
         self.current_cmd = 'stop' # 'forward', 'backward', 'left', 'right', 'stop'
-        self.last_step_time = 0
         
         # Timer for gait loop
-        self.timer = self.create_timer(TIMER_PERIOD, self.gait_loop)
+        self.timer = self.create_timer(STEP_DELAY, self.gait_loop)
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
-        
-        # 1. 將 timeout 改為 0 (不等待，立即檢查)
-        rlist, _, _ = select.select([sys.stdin], [], [], 0.0)
-        
-        key = ''
+        rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
         if rlist:
-            # 2. 如果有資料，使用迴圈把緩衝區"清空"，只取最後一個字元
-            # 這能解決"按住不放後，放開卻停不下來"的問題
-            while True:
-                input_char = sys.stdin.read(1)
-                if input_char:
-                    key = input_char
-                
-                # 再次檢查是否還有剩餘的字元在排隊
-                rlist_check, _, _ = select.select([sys.stdin], [], [], 0.0)
-                if not rlist_check:
-                    break # 緩衝區空了，跳出
-                    
-        termios.tcsetattr(sys.stdin, termios.TCSANOW, self.settings)
+            key = sys.stdin.read(1)
+        else:
+            key = ''
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
         return key
 
     def gait_loop(self):
@@ -96,23 +81,16 @@ class HexapodTeleop(Node):
         if self.current_cmd == 'stop':
             self.reset_to_neutral()
         else:
-            now = time.time()
-            if now - self.last_step_time > GAIT_INTERVAL:
-                self.step_gait()
-                self.last_step_time = now
+            self.step_gait()
             
         self.publish_joints()
 
     def reset_to_neutral(self):
-        self.positions = []
-        for i in range(NUM_SERVOS):
-            # ID 1, 3, 5... (List Index 0, 2, 4...) 是 Coxa (水平)
-            # ID 2, 4, 6... (List Index 1, 3, 5...) 是 Femur (垂直)
-            if i % 2 == 0:
-                self.positions.append(NEUTRAL_COXA)   # 120.0
-            else:
-                self.positions.append(NEUTRAL_FEMUR)  # 30.0 (站立)
-        
+        self.positions = [0.0] * NUM_SERVOS
+        for leg_idx in range(6):
+            coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+            self.positions[coxa_id - 1] = NEUTRAL_COXA
+            self.positions[femur_id - 1] = NEUTRAL_FEMUR
         self.gait_phase = 0
 
     def step_gait(self):
@@ -170,8 +148,8 @@ class HexapodTeleop(Node):
             coxa_idx = coxa_id - 1
             femur_idx = femur_id - 1
             
-            # Femur: Lift means smaller angle (up)
-            femur_angle = NEUTRAL_FEMUR - LIFT_HEIGHT if lift else NEUTRAL_FEMUR
+            # Femur: Lift means larger angle (up from 0)
+            femur_angle = NEUTRAL_FEMUR + LIFT_HEIGHT if lift else NEUTRAL_FEMUR
             
             # Coxa:
             # Right side (Legs 0,1,2): Forward is -angle (e.g. 90->60) or +angle?

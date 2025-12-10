@@ -74,7 +74,7 @@ class HexapodTeleop(Node):
                 if not rlist_check:
                     break # 緩衝區空了，跳出
                     
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
+        termios.tcsetattr(sys.stdin, termios.TCSANOW, self.settings)
         return key
 
     def gait_loop(self):

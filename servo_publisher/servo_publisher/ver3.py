@@ -357,7 +357,7 @@ class HexapodTeleop(Node):
                         self.positions[coxa_id - 1] = NEUTRAL_COXA
                         self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
 
-        elif self.current_cmd == 'back':
+        elif self.current_cmd == 'backward':
             phase = self.gait_phase % 4
             if phase == 0:
                 for leg_idx in range(6):

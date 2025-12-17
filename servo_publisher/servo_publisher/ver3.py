@@ -183,7 +183,268 @@ class HexapodTeleop(Node):
                         self.positions[coxa_id - 1] = NEUTRAL_COXA
                         self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
 
+        if self.current_cmd == 'left':
+            phase = self.gait_phase % 4
+            if phase == 0:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+            elif phase == 1:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 2:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 3:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+
+        if self.current_cmd == 'right':
+            phase = self.gait_phase % 4
+            if phase == 0:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+            elif phase == 1:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 2:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 3:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+
+        if self.current_cmd == 'backward':
+            phase = self.gait_phase % 4
+            if phase == 0:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR 
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+            elif phase == 1:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA 
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 2:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+            elif phase == 3:
+                for leg_idx in range(6):
+                    coxa_id, femur_id = LEG_SERVO_MAP[leg_idx]
+                    if leg_idx == 0:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 1:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 2:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA + FB_SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 3:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
+                    elif leg_idx == 4:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA - SWING_ANGLE
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR
+                    elif leg_idx == 5:
+                        self.positions[coxa_id - 1] = NEUTRAL_COXA
+                        self.positions[femur_id - 1] = NEUTRAL_FEMUR + LIFT_HEIGHT
             self.gait_phase += 1
+  
 
     def publish_joints(self):
         msg = JointTrajectory()

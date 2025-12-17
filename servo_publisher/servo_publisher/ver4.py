@@ -8,6 +8,7 @@ import tty
 import select
 import math
 import time
+import math
 
 # Constants
 NUM_SERVOS = 12
@@ -18,12 +19,20 @@ NUM_SERVOS = 12
 
 # Neutral positions
 NEUTRAL_COXA = 120.0
-NEUTRAL_FEMUR = 40.0
+NEUTRAL_FEMUR = 60.0
 
 # Gait parameters
-LIFT_HEIGHT = 30.0  # Degrees to lift leg
+LIFT_HEIGHT = 20.0  # Degrees to lift leg
 SWING_ANGLE = 10.0  # Degrees to swing leg forward/backward
-FB_SWING_ANGLE = 30.0 # Degrees front and back leg swings
+
+# 將角度轉換為弧度以進行計算
+# 關係式: fbswing = arccos(cos(30) - tan(swing)) - 30
+rad_30 = math.radians(30.0)
+rad_swing = math.radians(SWING_ANGLE)
+
+val = math.cos(rad_30) - math.tan(rad_swing)
+FB_SWING_ANGLE = math.degrees(math.acos(val) - rad_30)
+
 STEP_DELAY = 0.2    # Seconds between gait steps (slower for safety)
 
 # Example: Map Leg 0 to Servos 11,12; Leg 1 to Servos 9,10...
@@ -475,4 +484,5 @@ if __name__ == '__main__':
     main()
 
   
+
 
